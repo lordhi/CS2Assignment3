@@ -8,10 +8,15 @@ public class HashTable
 
 	public HashTable(int n)
 	{
-		size = n*4;
+		size = n*2;
 
 		keys = new String[size];
 		values = new String[size];
+	}
+
+	public HashTable()
+	{
+
 	}
 
 	public void add(String k, String v)

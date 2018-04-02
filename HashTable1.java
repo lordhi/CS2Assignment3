@@ -1,15 +1,19 @@
 public class HashTable1
 	implements java.io.Serializable
 {
-	private int size;
+	protected final int size;
 
-	private MyHash h;
-	private String[] keys;
-	private String[] values;
+	protected final MyHash h;
+	protected String[] keys;
+	protected String[] values;
+
+	public HashTable1()
+	{
+	}
 
 	public HashTable1(int n)
 	{
-		size = n*4;
+		size = n*2;
 
 		h = new MyHash();
 		keys = new String[size];

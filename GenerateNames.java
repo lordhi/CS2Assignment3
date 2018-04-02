@@ -27,16 +27,16 @@ public class GenerateNames
 	public static String[] getEntries(int n)
 	{
 		loadNames();
-		if(n > 10000000)
+		if(n > 1000000)
 		{
 			int t = (int)(n/62);
 			int a = n - t*62;
 			t += 1;
 			String entries[] = new String[n];
-			for (int i=0; i<62; i++)
+			for (int i=18; i<80; i++)
 			{
 				System.out.println(i);
-				System.arraycopy(generateEntries(t,i+18,i+18), 0, entries, i*t, t);
+				System.arraycopy(generateEntries(t,i), 0, entries, i*t, t);
 				System.gc();
 				if (a > 0)
 					a--;
@@ -63,6 +63,11 @@ public class GenerateNames
 			System.err.println(e.getMessage());
 			System.exit(0);
 		}
+	}
+
+	private static String[] generateEntries(int n, int age)
+	{
+		return generateEntries(n, age, age);
 	}
 
 	private static String[] generateEntries(int n, int minAge, int maxAge)

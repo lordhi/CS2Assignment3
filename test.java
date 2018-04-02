@@ -9,24 +9,26 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.UnsafeOutput;
+import com.esotericsoftware.kryo.io.UnsafeInput;
 
 public class test
 {
+	static int n = 50000000;
 	public static void main(String[] args)
 	{
 		//hashTableTest();
 		//hashTableFromFileTest();
+		//hashTableSerialisedInTest();
 		//hashTable1FromFileTest();
-		hashTableSerialisedOutTest();
+		//hashTableSerialisedOutTest();
 		hashTableSerialisedInTest();
 	}
 
 	public static void hashTableSerialisedInTest()
 	{
 		long t1 = System.nanoTime();
-		try
+		/*try
 		{
 			FileInputStream fileIn = new FileInputStream("../testdata/ht.ser");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
@@ -36,31 +38,40 @@ public class test
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 			System.exit(0);
-		}
+		}*/
 		long t2 = System.nanoTime();
-		System.out.println("Serialised Hashtable read in " + (t2-t1)/1000000 + " ms");
+		//System.out.println("Serialised Hashtable read in " + (t2-t1)/1000000 + " ms");
 
-		t1 = System.nanoTime();
+/*		t1 = System.nanoTime();
+		String inp = "";
 		try
 		{
-			HashTable ht = new HashTable(1000);
+			HashTable ht = new HashTable(n);
 			BufferedReader in = new BufferedReader(new FileReader(new File("../testdata/test.csv")));
-			String inp;
-			while((inp = in.readLine()) != null)
+			inp = in.readLine();
+			while(true)
+			{
 				ht.add(inp.substring(0,13), inp.substring(14));
+				inp = in.readLine();
+				if (inp == null || inp.equals(null) || inp.equals("null"))
+				{
+					break;
+				}
+			}
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 			System.exit(0);
 		}
 		t2 = System.nanoTime();
-		System.out.println("Hashtable read and created in " + (t2-t1)/1000000 + " ms");
+		System.out.println("Hashtable read and created in " + (t2-t1)/1000000 + " ms");*/
 
 		t1 = System.nanoTime();
+		HashTable1 ht = new HashTable1();
 		try
 		{
 			Kryo kryo = new Kryo();
-			Input in = new Input(new FileInputStream("../testdata/kryo.bin"));
-			HashTable ht = kryo.readObject(in, HashTable.class);
+			UnsafeInput in = new UnsafeInput(new FileInputStream("../testdata/kryo.bin"));
+			ht = kryo.readObject(in, HashTable1.class);
 			in.close();
 		}catch(Exception e){
 			System.err.println(e.getMessage());
@@ -68,27 +79,36 @@ public class test
 		}
 		t2 = System.nanoTime();
 		System.out.println("Kryo Hashtable read in " + (t2-t1)/1000000 + " ms");
+
+                t1 = System.nanoTime();
+                System.out.println(ht.get("1704155584082"));
+                System.out.println(ht.get("9709125722088"));
+                System.out.println(ht.get("3609146863086"));
+                System.out.println(ht.get("4107207110089"));
+                t2 = System.nanoTime();
+                System.out.println("4 data reads done in " + (t2-t1)/1000000 + " ms");
+
 	}
 
 	public static void hashTableSerialisedOutTest()
 	{
-		int n = 1000;
                 HashTable ht = new HashTable(n);
 
                 MyHash hash = new MyHash();
 
                 long t1 = System.nanoTime();
-                String entries[] = GenerateNames.getEntries(n+1);
+                String entries[] = GenerateNames.getEntries(n+100);
                 long t2 = System.nanoTime();
                 System.out.println("List generated in " + (t2-t1)/1000000 + " ms");
 
                 String k[] = new String[n];
 		String id[] = new String[n];
+
                 for (int i=0; i<n; i++)
                 {
                         k[i] = entries[i].substring(0,13);
                         id[i] = entries[i].substring(14);
-                }
+		}
 
 		t1 = System.nanoTime();
 		try
@@ -110,7 +130,7 @@ public class test
                 t2 = System.nanoTime();
                 System.out.println("Hashtable created in " + (t2-t1)/1000000 + " ms");
 
-		t1 = System.nanoTime();
+		/*t1 = System.nanoTime();
 		try
 		{
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("../testdata/ht.ser"));
@@ -122,11 +142,11 @@ public class test
 		}
 		t2 = System.nanoTime();
 		System.out.println("Serialised Hashtable written in " + (t2-t1)/1000000 + " ms");
-
+*/
 		t1 = System.nanoTime();
 		try
 		{
-			Output out = new Output(new FileOutputStream("../testdata/kryo.bin"));
+			UnsafeOutput out = new UnsafeOutput(new FileOutputStream("../testdata/kryo.bin"));
 			Kryo kryo = new Kryo();
 			kryo.writeObject(out, ht);
 			out.close();
@@ -140,14 +160,14 @@ public class test
 
 	public static void hashTable1FromFileTest()
 	{
-		HashTable1 ht = new HashTable1(50000000);
+		HashTable1 ht = new HashTable1(n);
 		long t1 = System.nanoTime();
                 try
                 {
                         BufferedReader br = new BufferedReader(new FileReader(new File("../data/fakeZAPopulation.csv")));
                         String s;
                         int i = 0, j=1;
-                        while((s=br.readLine()) != null)
+                        while((s=br.readLine()) != null && (i + j*1000000) < n)
                         {
                                 ht.add(s.substring(0,13), s.substring(14));
                                 i++;
@@ -164,18 +184,41 @@ public class test
                 }
                 long t2 = System.nanoTime();
                 System.out.println("Data read from file and hashtable1 generated in " + (t2-t1)/1000000 + " ms");
+
+		t1 = System.nanoTime();
+		System.out.println(ht.get("1704155584082"));
+		System.out.println(ht.get("9709125722088"));
+		System.out.println(ht.get("3609146863086"));
+		System.out.println(ht.get("4107207110089"));
+		t2 = System.nanoTime();
+		System.out.println("4 data reads done in " + (t2-t1)/1000000 + " ms");
+
+                t1 = System.nanoTime();
+                try
+                {
+                        UnsafeOutput out = new UnsafeOutput(new FileOutputStream("../testdata/kryo.bin"));
+                        Kryo kryo = new Kryo();
+                        kryo.writeObject(out, ht);
+                        out.close();
+                }catch(Exception e){
+                        System.out.println(e.getMessage());
+                        System.exit(0);
+                }
+                t2 = System.nanoTime();
+                System.out.println("Kryo Hashtable written in " + (t2-t1)/1000000 + " ms");
+
 	}
 
 	public static void hashTableFromFileTest()
 	{
-		HashTable ht = new HashTable(50000000);
+		HashTable ht = new HashTable(n);
 		long t1 = System.nanoTime();
 		try
 		{
 			BufferedReader br = new BufferedReader(new FileReader(new File("../data/fakeZAPopulation.csv")));
 			String s;
 			int i = 0, j=1;
-			while((s=br.readLine()) != null)
+			while((s=br.readLine()) != null && (i + j*1000000) < n)
 			{
 				ht.add(s.substring(0,13), s.substring(14));
 				i++;
