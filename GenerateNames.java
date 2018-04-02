@@ -27,7 +27,7 @@ public class GenerateNames
 	public static String[] getEntries(int n)
 	{
 		loadNames();
-		if(n > 1000000)
+		if(n > 10000000)
 		{
 			int t = (int)(n/62);
 			int a = n - t*62;

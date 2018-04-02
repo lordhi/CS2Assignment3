@@ -1,26 +1,29 @@
-public class HashTable
+public class HashTable1
 	implements java.io.Serializable
 {
 	private int size;
 
+	private MyHash h;
 	private String[] keys;
 	private String[] values;
 
-	public HashTable(int n)
+	public HashTable1(int n)
 	{
 		size = n*4;
 
+		h = new MyHash();
 		keys = new String[size];
 		values = new String[size];
 	}
 
 	public void add(String k, String v)
 	{
-		int i = MyHash.hash(k, size);
+		int i = h.hash(k, size);
+		int t = 1;
 
 		while(values[i] != null)
 		{
-			i++;
+			i = h.hash(k, size, t++);
 		}
 
 		keys[i] = k;
@@ -29,11 +32,12 @@ public class HashTable
 
 	public String get(String k)
 	{
-		int i = MyHash.hash(k, size);
+		int i = h.hash(k, size);
+		int t = 1;
 
 		while(!k.equals(keys[i]))
 		{
-			i++;
+			i = h.hash(k, size, t++);
 		}
 
 		return values[i];

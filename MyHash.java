@@ -1,11 +1,11 @@
 public class MyHash
 {
-	public int hash(String s, int size)
+	public static int hash(String s, int size)
 	{
 		return hash(s, size, 0);
 	}
 
-	public int hash(String s, int size, int hn)
+	public static int hash(String s, int size, int hn)
 	{
 		int tmp=0;
 		for(int i=0; i<10; i++)
