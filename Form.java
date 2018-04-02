@@ -9,7 +9,10 @@ import javax.swing.AbstractAction;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.KeyStroke;
+import javax.swing.border.Border;
+import javax.swing.BorderFactory;
 
+import java.awt.Color;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -226,8 +229,41 @@ public class Form
 		txfEntry.addKeyListener(new KeyAdapter(){
 			public void keyTyped(KeyEvent e){
 				char typed = e.getKeyChar();
+				String s = txfEntry.getText();
 				if ((typed < '0' || typed > '9'))
+				{
 					e.consume();
+				}else{
+					if (s.equals("Enter ID number here."))
+					{
+						s = typed + "";
+						txfEntry.setText(s);
+						e.consume();
+					}
+
+					if (s.length() != 12)
+						updateBorderColour(s.length());
+					else if (s.length() == 12)
+						updateBorderColour(12);
+				}
+			}
+			public void keyPressed(KeyEvent e)
+			{
+				if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE)
+				{
+					String s = txfEntry.getText();
+
+					if (s.length() == 1)
+					{
+						txfEntry.setText("Enter ID number here.");
+						updateBorderColour(-1);
+						e.consume();
+					}else{
+						s = s.replaceAll("[^\\d]", "");
+						txfEntry.setText(s);
+						updateBorderColour(s.length());
+					}
+				}
 			}
 		});
 		txfEntry.addActionListener(enterOrButton);
@@ -249,5 +285,17 @@ public class Form
 		pnl.add(lblstuff);
 
 		return pnl;
+	}
+
+	private void updateBorderColour(int length)
+	{
+		Border border;
+		if (length == -1)
+			border = BorderFactory.createLineBorder(Color.GRAY, 0);
+		else if(length == 12)
+			border = BorderFactory.createLineBorder(Color.GREEN, 2);
+		else
+			border = BorderFactory.createLineBorder(Color.RED, 2);
+		txfEntry.setBorder(border);
 	}
 }

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.time.Year;
+import java.util.HashMap;
 
 public class GenerateNames
 {
@@ -17,17 +18,37 @@ public class GenerateNames
 	public static void main(String[] args)
 	{
 		checkArgs(args);
-		loadNames();
 
 		int n = args.length == 0 ? 50 : Integer.parseInt(args[0]);
-		String entries[] = generateEntries(n);
+		String entries[] = getEntries(n);
 		writeEntriesToFile("../data/IDList.csv", entries);
 	}
 
 	public static String[] getEntries(int n)
 	{
 		loadNames();
-		return generateEntries(n);
+		if(n > 1000000)
+		{
+			int t = (int)(n/62);
+			int a = n - t*62;
+			t += 1;
+			String entries[] = new String[n];
+			for (int i=0; i<62; i++)
+			{
+				System.out.println(i);
+				System.arraycopy(generateEntries(t,i+18,i+18), 0, entries, i*t, t);
+				System.gc();
+				if (a > 0)
+					a--;
+				else if (a == 0)
+				{
+					t--;
+					a--;
+				}
+			}
+			return entries;
+		}else
+			return generateEntries(n, 18, 80);
 	}
 
 	private static void writeEntriesToFile(String filename, String entries[])
@@ -44,17 +65,32 @@ public class GenerateNames
 		}
 	}
 
-	private static String[] generateEntries(int n)
+	private static String[] generateEntries(int n, int minAge, int maxAge)
 	{
 		Random ran = new Random();
-		int minAge = 18;
-		int maxAge = 80;
 		int year = Year.now().getValue();
 
-		String entries[] = new String[n];
+		HashMap<Integer, String> entries = new HashMap<Integer, String>();
 		for (int i=0; i < n; i++)
-			entries[i] = generateEntry(ran, year-maxAge, year-minAge);
-		return entries;
+		{
+			boolean clash;
+			do{
+				clash = false;
+				String s = generateEntry(ran, year-maxAge, year-minAge);
+				if(!entries.containsKey(s.substring(0,10).hashCode()))
+					entries.put(s.substring(0,10).hashCode(), s);
+				else
+					clash = true;
+			}while(clash);
+		}
+
+		String arr[] = new String[n];
+		Object tmp[] = entries.values().toArray();
+
+		for (int i=0; i<n; i++)
+			arr[i] = (String)(tmp[i]);
+
+		return arr;
 	}
 
 	private static String generateEntry(Random ran, int minYear, int maxYear)
