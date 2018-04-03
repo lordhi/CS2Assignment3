@@ -11,6 +11,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.BorderFactory;
+import javax.swing.ProgressMonitor;
 
 import java.awt.Color;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -27,6 +28,10 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Dimension;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+
 public class Form
 	extends JFrame{
 
@@ -35,6 +40,8 @@ public class Form
 	private JTextField txfEntry;
 	private JButton btnCheckID;
 	private AbstractAction enterOrButton, pasteAction;
+
+	private HashTable ht;
 
 	public static void main(String[] args)
 	{
@@ -59,9 +66,14 @@ public class Form
 
 		                if (ID.length() == 13)
         	        	{
-                	        	addNewID(ID + "  ", "Kaedon Jon Williams");
+					String name = ht.get(ID);
+					if (name != null)
+                	        		addNewID(ID + "  ", name);
+					else
+						addNewID(ID + "");
 					txfEntry.setText("Enter ID number here.");
-	                	}
+				}
+				updateBorderColour(-1);
         	        System.out.println("Pressed!");
 			}
 		};
@@ -103,6 +115,9 @@ public class Form
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("ID Checking App");
 		setSize(900, 600);
+
+		ht = new HashTable(50000000);
+		loadIDs(ht);
 
 		setContentPane(mainPanel);
 		setVisible(true);
@@ -241,10 +256,7 @@ public class Form
 						e.consume();
 					}
 
-					if (s.length() != 12)
-						updateBorderColour(s.length());
-					else if (s.length() == 12)
-						updateBorderColour(12);
+					updateBorderColour(s.length());
 				}
 			}
 			public void keyPressed(KeyEvent e)
@@ -297,5 +309,35 @@ public class Form
 		else
 			border = BorderFactory.createLineBorder(Color.RED, 2);
 		txfEntry.setBorder(border);
+	}
+
+	private void loadIDs(HashTable table)
+	{
+		try
+		{
+			ProgressMonitor pm = new ProgressMonitor(this, "Loading data file", null,0, 100);
+			BufferedReader br = new BufferedReader(new FileReader(new File("../data/fakeZAPopulation.csv")));
+			String s;
+			int i = 0, j=1;
+			while ((s=br.readLine()) != null && j < 10)
+			{
+				ht.add(s.substring(0,13), s.substring(14));
+				i++;
+				if (pm.isCanceled())
+					System.exit(0);
+				if (i==500000)
+				{
+					System.out.println(10*j + "%");
+					pm.setProgress(10*j);
+					//pm.updateLabel("Loading data + (" + 10*j + "%)");
+					i=0;
+					j++;
+				}
+			}
+			pm.close();
+		}catch(Exception e){
+			System.err.println(e.getMessage());
+			System.exit(0);
+		}
 	}
 }

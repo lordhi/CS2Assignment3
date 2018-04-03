@@ -19,8 +19,7 @@ public class test
 	{
 		//hashTableTest();
 		//hashTableFromFileTest();
-		//hashTableSerialisedInTest();
-		//hashTable1FromFileTest();
+		hashTable1FromFileTest();
 		//hashTableSerialisedOutTest();
 		hashTableSerialisedInTest();
 	}
@@ -66,28 +65,23 @@ public class test
 		System.out.println("Hashtable read and created in " + (t2-t1)/1000000 + " ms");*/
 
 		t1 = System.nanoTime();
-		HashTable1 ht = new HashTable1();
+		long m1 = Runtime.getRuntime().freeMemory();
+		HashTable ht = new HashTable();
 		try
 		{
 			Kryo kryo = new Kryo();
 			UnsafeInput in = new UnsafeInput(new FileInputStream("../testdata/kryo.bin"));
-			ht = kryo.readObject(in, HashTable1.class);
+			ht = kryo.readObject(in, HashTable.class);
 			in.close();
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 			System.exit(0);
 		}
+		System.gc();
+		long m2 = Runtime.getRuntime().freeMemory();
 		t2 = System.nanoTime();
 		System.out.println("Kryo Hashtable read in " + (t2-t1)/1000000 + " ms");
-
-                t1 = System.nanoTime();
-                System.out.println(ht.get("1704155584082"));
-                System.out.println(ht.get("9709125722088"));
-                System.out.println(ht.get("3609146863086"));
-                System.out.println(ht.get("4107207110089"));
-                t2 = System.nanoTime();
-                System.out.println("4 data reads done in " + (t2-t1)/1000000 + " ms");
-
+		System.out.println("Hashtable uses " + (m2-m1)/(1024*1024) + " megabytes");
 	}
 
 	public static void hashTableSerialisedOutTest()
@@ -160,7 +154,7 @@ public class test
 
 	public static void hashTable1FromFileTest()
 	{
-		HashTable1 ht = new HashTable1(n);
+		HashTable ht = new HashTable(n);
 		long t1 = System.nanoTime();
                 try
                 {
@@ -186,12 +180,6 @@ public class test
                 System.out.println("Data read from file and hashtable1 generated in " + (t2-t1)/1000000 + " ms");
 
 		t1 = System.nanoTime();
-		System.out.println(ht.get("1704155584082"));
-		System.out.println(ht.get("9709125722088"));
-		System.out.println(ht.get("3609146863086"));
-		System.out.println(ht.get("4107207110089"));
-		t2 = System.nanoTime();
-		System.out.println("4 data reads done in " + (t2-t1)/1000000 + " ms");
 
                 t1 = System.nanoTime();
                 try

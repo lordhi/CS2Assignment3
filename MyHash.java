@@ -12,7 +12,7 @@ public class MyHash
 		{
 			tmp += s.charAt(i);
 			tmp += (tmp << (hn+15));
-			tmp ^= (tmp >> 8);
+			tmp ^= (tmp >>(hn+8));
 		}
 
 		tmp += (tmp << 5);

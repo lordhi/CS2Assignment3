@@ -1,44 +1,53 @@
 public class HashTable
 	implements java.io.Serializable
 {
-	private int size;
+	protected int size;
 
-	private String[] keys;
-	private String[] values;
+	protected  transient MyHash h;
 
-	public HashTable(int n)
-	{
-		size = n*2;
-
-		keys = new String[size];
-		values = new String[size];
-	}
+	protected Long[] keys;
+	protected String[] values;
 
 	public HashTable()
 	{
+		h = new MyHash();
+	}
 
+	public HashTable(int n)
+	{
+		size = (int)(n*4);
+
+		h = new MyHash();
+		keys = new Long[size];
+		values = new String[size];
 	}
 
 	public void add(String k, String v)
 	{
-		int i = MyHash.hash(k, size);
+		int i = h.hash(k, size);
+		int t = 1;
 
 		while(values[i] != null)
 		{
-			i++;
+			i = h.hash(k, size, t++);
 		}
 
-		keys[i] = k;
+		keys[i] = Long.parseLong(k);
 		values[i] = v;
 	}
 
 	public String get(String k)
 	{
-		int i = MyHash.hash(k, size);
+		int i = h.hash(k, size);
+		int t = 1;
 
-		while(!k.equals(keys[i]))
+		while(!k.equals(keys[i] + ""))
 		{
-			i++;
+			if (values[i] == null)
+			{
+				return null;
+			}
+			i = h.hash(k, size, t++);
 		}
 
 		return values[i];
@@ -49,7 +58,7 @@ public class HashTable
 		for (int i=0; i<size; i++)
 		{
 			if (values[i] != null && values[i].equals(s))
-				return keys[i];
+				return keys[i] + "";
 		}
 		return null;
 	}
