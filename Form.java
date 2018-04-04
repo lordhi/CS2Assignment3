@@ -43,6 +43,8 @@ public class Form
 
 	private HashTable ht;
 
+	private int n = 50000000;
+
 	public static void main(String[] args)
 	{
 		SwingUtilities.invokeLater(new Runnable()
@@ -70,11 +72,10 @@ public class Form
 					if (name != null)
                 	        		addNewID(ID + "  ", name);
 					else
-						addNewID(ID + "");
+						addNewID(ID + " ");
 					txfEntry.setText("Enter ID number here.");
 				}
 				updateBorderColour(-1);
-        	        System.out.println("Pressed!");
 			}
 		};
 
@@ -116,7 +117,7 @@ public class Form
 		setTitle("ID Checking App");
 		setSize(900, 600);
 
-		ht = new HashTable(50000000);
+		ht = new HashTable(n);
 		loadIDs(ht);
 
 		setContentPane(mainPanel);
@@ -316,20 +317,22 @@ public class Form
 		try
 		{
 			ProgressMonitor pm = new ProgressMonitor(this, "Loading data file", null,0, 100);
-			BufferedReader br = new BufferedReader(new FileReader(new File("../data/fakeZAPopulation.csv")));
+			BufferedReader br = new BufferedReader(new FileReader(new File("../data/IDList.csv")));
+			pm.setProgress(0);
 			String s;
 			int i = 0, j=1;
-			while ((s=br.readLine()) != null && j < 10)
+			int p = (int)(n/100);
+			while ((s=br.readLine()) != null)
 			{
 				ht.add(s.substring(0,13), s.substring(14));
+
 				i++;
 				if (pm.isCanceled())
 					System.exit(0);
-				if (i==500000)
+				if (i==p)
 				{
-					System.out.println(10*j + "%");
-					pm.setProgress(10*j);
-					//pm.updateLabel("Loading data + (" + 10*j + "%)");
+					System.out.println(j + "%");
+					pm.setProgress(j);
 					i=0;
 					j++;
 				}

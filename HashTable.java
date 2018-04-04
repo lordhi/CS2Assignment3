@@ -5,7 +5,7 @@ public class HashTable
 
 	protected  transient MyHash h;
 
-	protected Long[] keys;
+	protected long[] keys;
 	protected String[] values;
 
 	public HashTable()
@@ -18,7 +18,7 @@ public class HashTable
 		size = (int)(n*4);
 
 		h = new MyHash();
-		keys = new Long[size];
+		keys = new long[size];
 		values = new String[size];
 	}
 
@@ -40,13 +40,10 @@ public class HashTable
 	{
 		int i = h.hash(k, size);
 		int t = 1;
+		Long tmp = Long.parseLong(k);
 
-		while(!k.equals(keys[i] + ""))
+		while(!tmp.equals(keys[i]))
 		{
-			if (values[i] == null)
-			{
-				return null;
-			}
 			i = h.hash(k, size, t++);
 		}
 

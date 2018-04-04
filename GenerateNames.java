@@ -21,30 +21,54 @@ public class GenerateNames
 
 		int n = args.length == 0 ? 50 : Integer.parseInt(args[0]);
 		String entries[] = getEntries(n);
-		writeEntriesToFile("../data/IDList.csv", entries);
+		if(n <= 1000000)
+			writeEntriesToFile("../data/IDList.csv", entries);
 	}
 
 	public static String[] getEntries(int n)
 	{
 		loadNames();
-		if(n > 1000000)
+		if (n > 1000000)
+		{
+			long t1 = System.nanoTime();
+			IterativeGenerator it = new IterativeGenerator(n, "../data/IDList.csv");
+
+			String entries[] = new String[2];
+			int i = 0;
+			int p = (int) (n/100);
+			while (it.hasNext())
+			{
+				i++;
+				if (i%p == 0)
+					System.out.println(i/p);
+				String[] t = it.next();
+			}
+			long t2 = System.nanoTime();
+			System.out.println("Took " + (t2-t1)/1000000 + " ms to generate " + n + " names and ID numbers.");
+			
+			return entries;
+		}
+		else if(n > 10000)
 		{
 			int t = (int)(n/62);
 			int a = n - t*62;
 			t += 1;
+			int e = 0;
+			System.out.println(n);
 			String entries[] = new String[n];
 			for (int i=18; i<80; i++)
 			{
-				System.out.println(i);
-				System.arraycopy(generateEntries(t,i), 0, entries, i*t, t);
-				System.gc();
 				if (a > 0)
 					a--;
-				else if (a == 0)
-				{
+				else if (a == 0){
 					t--;
 					a--;
 				}
+
+				System.out.println(i);
+				System.arraycopy(generateEntries(t,i), 0, entries, e, t);
+				System.gc();
+				e += t;
 			}
 			return entries;
 		}else
