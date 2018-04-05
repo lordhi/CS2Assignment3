@@ -12,6 +12,15 @@ import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.BorderFactory;
 import javax.swing.ProgressMonitor;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.SwingWorker;
+import javax.swing.JSlider;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import java.awt.Color;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -32,6 +41,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
+import java.util.Hashtable; //Need to use a dictionary for the testing pane, however unfortunately named
+
+import java.lang.Math;
+
 public class Form
 	extends JFrame{
 
@@ -39,11 +52,17 @@ public class Form
 	private JLabel lblname1, lblname2, lblname3, lblname4, lblname5, lblname6, lblid1, lblid2, lblid3, lblid4, lblid5, lblid6, lblstuff;
 	private JTextField txfEntry;
 	private JButton btnCheckID;
-	private AbstractAction enterOrButton, pasteAction;
+	private AbstractAction enterOrButton, pasteAction, reload, generateData;
+
+	private JMenuBar menuBar;
+	private JMenu menuFile, menuTest;
+	private JMenuItem menuItem, generateNewData;
+
+	private SwingWorker loadTable, makeData;
 
 	private HashTable ht;
 
-	private int n = 50000000;
+	private int n = 30000000;
 
 	public static void main(String[] args)
 	{
@@ -59,11 +78,12 @@ public class Form
 
 	public Form()
 	{
-		mainPanel = new JPanel(new GridLayout(3,1));
+		instantiateDataLoadThread();
 
 		enterOrButton = new AbstractAction(){
 			@Override
-			public void actionPerformed(ActionEvent e){
+			public void actionPerformed(ActionEvent e)
+			{
 				String ID = txfEntry.getText();
 
 		                if (ID.length() == 13)
@@ -79,9 +99,27 @@ public class Form
 			}
 		};
 
+		reload = new AbstractAction()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{	
+				instantiateDataLoadThread();
+			}
+		};
+
+		generateData = new AbstractAction(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				insantiateDataGenerationThread();
+			}
+		};
+
 		pasteAction = new AbstractAction(){
 			@Override
-			public void actionPerformed(ActionEvent e){
+			public void actionPerformed(ActionEvent e)
+			{
 				try
 				{
 					String s = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
@@ -109,6 +147,8 @@ public class Form
 			}
 		};
 
+		mainPanel = new JPanel(new GridLayout(3,1));
+
 		mainPanel.add(dataEntry());
 		mainPanel.add(lastName());
 		mainPanel.add(oldNames());
@@ -117,8 +157,7 @@ public class Form
 		setTitle("ID Checking App");
 		setSize(900, 600);
 
-		ht = new HashTable(n);
-		loadIDs(ht);
+		this.setJMenuBar(menuStuff());
 
 		setContentPane(mainPanel);
 		setVisible(true);
@@ -234,6 +273,34 @@ public class Form
 		return pn;
 	}
 
+	private JMenuBar menuStuff()
+	{
+		Font mF = new Font("Verdana", 2, 20);
+		Font iF = new Font("Verdana", 2, 16);
+
+		menuBar = new JMenuBar();
+
+		menuFile = new JMenu("File");
+		menuFile.setFont(mF);
+		menuTest = new JMenu("Test");
+		menuTest.setFont(mF);
+
+		JMenuItem reloadData = new JMenuItem("Reload the data file");
+		reloadData.setFont(iF);
+		reloadData.addActionListener(reload);
+		menuFile.add(reloadData);
+		
+		JMenuItem generateNewData = new JMenuItem("Generate new data");
+		generateNewData.setFont(iF);
+		generateNewData.addActionListener(generateData);
+		menuTest.add(generateNewData);
+
+		menuBar.add(menuFile);
+		menuBar.add(menuTest);
+
+		return menuBar;
+	}
+
 	private JPanel dataEntry()
 	{
 		JPanel pnl = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 30));
@@ -321,11 +388,15 @@ public class Form
 			pm.setProgress(0);
 			String s;
 			int i = 0, j=1;
-			int p = (int)(n/100);
+			int p = (int)(n/100) + 1;
 			while ((s=br.readLine()) != null)
 			{
 				ht.add(s.substring(0,13), s.substring(14));
 
+				if (!s.substring(14).equals(ht.get(s.substring(0,13))))
+				{
+					System.out.println(ht.get(s.substring(0,13)));
+				}
 				i++;
 				if (pm.isCanceled())
 					System.exit(0);
@@ -338,9 +409,135 @@ public class Form
 				}
 			}
 			pm.close();
+			br.close();
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 			System.exit(0);
 		}
+	}
+
+	private void instantiateDataLoadThread()
+	{
+		if(loadTable != null)
+			loadTable.cancel(true);
+	
+		loadTable = new SwingWorker<HashTable, Void>()
+		{
+			@Override
+			public HashTable doInBackground()
+			{
+				System.out.println("Loading");
+				ht = null;
+
+				ht = new HashTable(n);
+				loadIDs(ht);
+				System.out.println("Loaded");
+				return ht;
+			}
+
+			@Override
+			public void done()
+			{
+				try
+				{
+					ht = get();
+				}catch(Exception e){
+					e.printStackTrace();
+					System.exit(0);
+				}
+			}
+		};
+
+		loadTable.execute();
+	}
+
+	private void insantiateDataGenerationThread()
+	{
+		if (makeData != null)
+			makeData.cancel(true);
+
+		makeData = new SwingWorker<HashTable, Void>()
+		{
+			@Override
+			public HashTable doInBackground()
+			{
+				JOptionPane pane = new JOptionPane();
+				Object obj[] = new Object[3];
+				JSlider slide = new JSlider(100,700);
+
+				// Note: This is a Hashtable not a HashTable. A dictionary was needed to set the labels on the JSlider, however dictionaries have been deprecated. This was the only one I could find.
+				Hashtable<Integer, JLabel> labeldic = new Hashtable();
+				labeldic.put(100, new JLabel("30"));
+				labeldic.put(200, new JLabel("300"));
+				labeldic.put(300, new JLabel("3 000"));
+				labeldic.put(400, new JLabel("30 000"));
+				labeldic.put(500, new JLabel("300 000"));
+				labeldic.put(600, new JLabel("3 000 000"));
+				labeldic.put(700, new JLabel("30 000 000"));
+
+				slide.setLabelTable(labeldic);
+				slide.setPaintLabels(true);
+				slide.setMajorTickSpacing(100);
+				slide.setPaintTicks(true);
+
+				JLabel lbl = new JLabel();
+
+				slide.addChangeListener(new ChangeListener()
+					{
+						public void stateChanged(ChangeEvent changeEvent)
+						{
+							JSlider theSlider = (JSlider) changeEvent.getSource();
+							if (!theSlider.getValueIsAdjusting())
+								pane.setMessage(obj);
+							int tmp = (int) (3*Math.pow(10, theSlider.getValue()/100.0));
+							pane.setInputValue(tmp);
+							lbl.setText("Current Value: " + tmp);
+						}
+					});
+				obj[0] = "Select number of values to be generated: ";
+				obj[1] = slide;
+				obj[2] = lbl;
+				pane.setMessage(obj);
+				pane.setMessageType(JOptionPane.QUESTION_MESSAGE);
+				pane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
+
+				JDialog dialog = pane.createDialog(mainPanel, "Select number.");
+				dialog.setPreferredSize(new Dimension(600, 200));
+				dialog.pack();
+				dialog.setVisible(true);
+				
+				n = (int) pane.getInputValue();
+				System.out.println(n);
+
+				if (n <= 1000000)
+				{
+					GenerateNames.getEntries(n);
+					instantiateDataLoadThread();
+				}else{
+					IterativeGenerator it = new IterativeGenerator(n, "../data/IDList.csv");
+					ht = null;
+					
+					ProgressMonitor pm = new ProgressMonitor(mainPanel, "Loading data file", null, 0, n);
+
+					int i = 0;
+					
+					while(it.hasNext())
+					{
+						String s[] = it.next();
+						ht.add(s[0], s[1]);
+						pm.setProgress(i);
+						i++;
+						if(pm.isCanceled())
+							System.exit(0);
+					}
+					pm.close();
+				}
+
+
+				return null;
+			}
+		};
+
+		makeData.execute();
 	}
 }

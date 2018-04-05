@@ -1,21 +1,24 @@
 public class HashTable
-	implements java.io.Serializable
+//	implements java.io.Serializable
 {
 	protected int size;
 
-	protected  transient MyHash h;
+	protected transient MyHash h;
+	protected transient int i;
+	protected transient int t;
+	protected transient Long tmp;
 
 	protected long[] keys;
 	protected String[] values;
 
-	public HashTable()
+/*	public HashTable()
 	{
 		h = new MyHash();
-	}
+	}*/
 
 	public HashTable(int n)
 	{
-		size = (int)(n*4);
+		size = (int)(n*2);
 
 		h = new MyHash();
 		keys = new long[size];
@@ -24,13 +27,13 @@ public class HashTable
 
 	public void add(String k, String v)
 	{
-		int i = h.hash(k, size);
-		int t = 1;
+		t = 1;
 
-		while(values[i] != null)
+		do
 		{
 			i = h.hash(k, size, t++);
 		}
+		while(values[i] != null);
 
 		keys[i] = Long.parseLong(k);
 		values[i] = v;
@@ -38,21 +41,21 @@ public class HashTable
 
 	public String get(String k)
 	{
-		int i = h.hash(k, size);
-		int t = 1;
-		Long tmp = Long.parseLong(k);
+		t = 1;
+		tmp = Long.parseLong(k);
 
-		while(!tmp.equals(keys[i]))
-		{
+		do{
 			i = h.hash(k, size, t++);
-		}
+			if (values[i] == null)
+				return null;
+		}while(!tmp.equals(keys[i]));
 
 		return values[i];
 	}
 
 	public String keyOf(String s)
 	{
-		for (int i=0; i<size; i++)
+		for (i=0; i<size; i++)
 		{
 			if (values[i] != null && values[i].equals(s))
 				return keys[i] + "";

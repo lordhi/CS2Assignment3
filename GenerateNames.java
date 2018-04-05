@@ -21,13 +21,12 @@ public class GenerateNames
 
 		int n = args.length == 0 ? 50 : Integer.parseInt(args[0]);
 		String entries[] = getEntries(n);
-		if(n <= 1000000)
-			writeEntriesToFile("../data/IDList.csv", entries);
 	}
 
 	public static String[] getEntries(int n)
 	{
 		loadNames();
+		System.out.println("Generating names");
 		if (n > 1000000)
 		{
 			long t1 = System.nanoTime();
@@ -40,7 +39,7 @@ public class GenerateNames
 			{
 				i++;
 				if (i%p == 0)
-					System.out.println(i/p);
+					System.out.println(i/p + "%");
 				String[] t = it.next();
 			}
 			long t2 = System.nanoTime();
@@ -54,7 +53,6 @@ public class GenerateNames
 			int a = n - t*62;
 			t += 1;
 			int e = 0;
-			System.out.println(n);
 			String entries[] = new String[n];
 			for (int i=18; i<80; i++)
 			{
@@ -65,14 +63,18 @@ public class GenerateNames
 					a--;
 				}
 
-				System.out.println(i);
 				System.arraycopy(generateEntries(t,i), 0, entries, e, t);
 				System.gc();
 				e += t;
 			}
+			writeEntriesToFile("../data/IDList.csv", entries);
 			return entries;
 		}else
-			return generateEntries(n, 18, 80);
+		{
+			String entries[] = generateEntries(n, 18, 80);
+			writeEntriesToFile("../data/IDList.csv", entries);
+			return entries;
+		}
 	}
 
 	private static void writeEntriesToFile(String filename, String entries[])
@@ -106,8 +108,8 @@ public class GenerateNames
 			do{
 				clash = false;
 				String s = generateEntry(ran, year-maxAge, year-minAge);
-				if(!entries.containsKey(s.substring(0,10).hashCode()))
-					entries.put(s.substring(0,10).hashCode(), s);
+				if(!entries.containsKey(s.substring(0,13).hashCode()))
+					entries.put(s.substring(0,13).hashCode(), s);
 				else
 					clash = true;
 			}while(clash);

@@ -19,7 +19,7 @@ public class test
 	{
 		//hashTableTest();
 		//hashTableFromFileTest();
-		hashTable1FromFileTest();
+		//hashTable1FromFileTest();
 		//hashTableSerialisedOutTest();
 		hashTableSerialisedInTest();
 	}
@@ -158,7 +158,7 @@ public class test
 		long t1 = System.nanoTime();
                 try
                 {
-                        BufferedReader br = new BufferedReader(new FileReader(new File("../data/fakeZAPopulation.csv")));
+                        BufferedReader br = new BufferedReader(new FileReader(new File("../data/IDList.csv")));
                         String s;
                         int i = 0, j=1;
                         while((s=br.readLine()) != null && (i + j*1000000) < n)
