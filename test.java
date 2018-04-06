@@ -14,14 +14,14 @@ import com.esotericsoftware.kryo.io.UnsafeInput;
 
 public class test
 {
-	static int n = 50000000;
+	static int n = 10000000;
 	public static void main(String[] args)
 	{
 		//hashTableTest();
 		//hashTableFromFileTest();
 		//hashTable1FromFileTest();
 		//hashTableSerialisedOutTest();
-		hashTableSerialisedInTest();
+		//hashTableSerialisedInTest();
 	}
 
 	public static void hashTableSerialisedInTest()
@@ -39,9 +39,9 @@ public class test
 			System.exit(0);
 		}*/
 		long t2 = System.nanoTime();
-		//System.out.println("Serialised Hashtable read in " + (t2-t1)/1000000 + " ms");
+		System.out.println("Serialised Hashtable read in " + (t2-t1)/1000000 + " ms");
 
-/*		t1 = System.nanoTime();
+		t1 = System.nanoTime();
 		String inp = "";
 		try
 		{
@@ -62,11 +62,11 @@ public class test
 			System.exit(0);
 		}
 		t2 = System.nanoTime();
-		System.out.println("Hashtable read and created in " + (t2-t1)/1000000 + " ms");*/
+		System.out.println("Hashtable read and created in " + (t2-t1)/1000000 + " ms");
 
 		t1 = System.nanoTime();
 		long m1 = Runtime.getRuntime().freeMemory();
-		HashTable ht = new HashTable();
+		HashTable ht;
 		try
 		{
 			Kryo kryo = new Kryo();
@@ -86,43 +86,34 @@ public class test
 
 	public static void hashTableSerialisedOutTest()
 	{
-                HashTable ht = new HashTable(n);
+        HashTable ht = new HashTable(n);
 
-                MyHash hash = new MyHash();
+        MyHash hash = new MyHash();
 
-                long t1 = System.nanoTime();
-                String entries[] = GenerateNames.getEntries(n+100);
-                long t2 = System.nanoTime();
-                System.out.println("List generated in " + (t2-t1)/1000000 + " ms");
-
-                String k[] = new String[n];
+        String k[] = new String[n];
 		String id[] = new String[n];
+		Long t1, t2;
 
-                for (int i=0; i<n; i++)
-                {
-                        k[i] = entries[i].substring(0,13);
-                        id[i] = entries[i].substring(14);
-		}
-
-		t1 = System.nanoTime();
-		try
+        try
 		{
-			BufferedWriter wr = new BufferedWriter(new FileWriter("../testdata/test.csv"));
-			for(String ln : entries)
-				wr.write(ln + "\r\n");
-			wr.close();
+			String inp;
+			BufferedReader in = new BufferedReader(new FileReader(new File("../data/IDList.csv")));
+			for(int i=0; i<n; i++)
+			{
+				inp = in.readLine();
+				k[i] = inp.substring(0,13);
+				id[i] = inp.substring(14);
+			};
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 			System.exit(0);
 		}
-		t2 = System.nanoTime();
-		System.out.println("Entries written in " + (t2-t1)/1000000 + " ms");
 
-                t1 = System.nanoTime();
-                for (int i=0; i<n; i++)
-                        ht.add(k[i],id[i]);
-                t2 = System.nanoTime();
-                System.out.println("Hashtable created in " + (t2-t1)/1000000 + " ms");
+        t1 = System.nanoTime();
+        for (int i=0; i<n; i++)
+            ht.add(k[i],id[i]);
+        t2 = System.nanoTime();
+        System.out.println("Hashtable created in " + (t2-t1)/1000000 + " ms");
 
 		/*t1 = System.nanoTime();
 		try
@@ -135,8 +126,8 @@ public class test
 			System.exit(0);
 		}
 		t2 = System.nanoTime();
-		System.out.println("Serialised Hashtable written in " + (t2-t1)/1000000 + " ms");
-*/
+		System.out.println("Serialised Hashtable written in " + (t2-t1)/1000000 + " ms");*/
+
 		t1 = System.nanoTime();
 		try
 		{

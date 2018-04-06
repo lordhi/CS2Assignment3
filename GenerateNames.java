@@ -30,7 +30,7 @@ public class GenerateNames
 		if (n > 1000000)
 		{
 			long t1 = System.nanoTime();
-			IterativeGenerator it = new IterativeGenerator(n, "../data/IDList.csv");
+			IterativeGenerator it = new IterativeGenerator(n, "./data/IDList.csv");
 
 			String entries[] = new String[2];
 			int i = 0;
@@ -67,12 +67,12 @@ public class GenerateNames
 				System.gc();
 				e += t;
 			}
-			writeEntriesToFile("../data/IDList.csv", entries);
+			writeEntriesToFile("./data/IDList.csv", entries);
 			return entries;
 		}else
 		{
 			String entries[] = generateEntries(n, 18, 80);
-			writeEntriesToFile("../data/IDList.csv", entries);
+			writeEntriesToFile("./data/IDList.csv", entries);
 			return entries;
 		}
 	}
@@ -82,6 +82,7 @@ public class GenerateNames
 		try
 		{
 			BufferedWriter wr = new BufferedWriter(new FileWriter(filename));
+			wr.write(entries.length + "\r\n");
 			for (String ln : entries)
 				wr.write(ln + "\r\n");
 			wr.close();
@@ -101,7 +102,7 @@ public class GenerateNames
 		Random ran = new Random();
 		int year = Year.now().getValue();
 
-		HashMap<Integer, String> entries = new HashMap<Integer, String>();
+		HashMap<Long, String> entries = new HashMap<Long, String>();
 		for (int i=0; i < n; i++)
 		{
 			boolean clash;
@@ -109,7 +110,7 @@ public class GenerateNames
 				clash = false;
 				String s = generateEntry(ran, year-maxAge, year-minAge);
 				if(!entries.containsKey(s.substring(0,13).hashCode()))
-					entries.put(s.substring(0,13).hashCode(), s);
+					entries.put(Long.parseLong(s.substring(0,13)), s);
 				else
 					clash = true;
 			}while(clash);
@@ -127,7 +128,7 @@ public class GenerateNames
 	private static String generateEntry(Random ran, int minYear, int maxYear)
 	{
 		String name, surname, ID;
-		boolean isFemale = ran.nextInt(1) == 1;
+		boolean isFemale = ran.nextBoolean();
 
 		name = isFemale ? femFirstNames.get(ran.nextInt(femFirstNames.size())) : malFirstNames.get(ran.nextInt(malFirstNames.size()));
 		surname = surnames.get(ran.nextInt(surnames.size()));
@@ -143,9 +144,9 @@ public class GenerateNames
 		malFirstNames = new ArrayList<>();
 		surnames = new ArrayList<>();
 
-		loadFile("../NameLists/femaleNames.csv", femFirstNames);
-		loadFile("../NameLists/maleNames.csv", malFirstNames);
-		loadFile("../NameLists/surnames.csv", surnames);
+		loadFile("./NameLists/femaleNames.csv", femFirstNames);
+		loadFile("./NameLists/maleNames.csv", malFirstNames);
+		loadFile("./NameLists/surnames.csv", surnames);
 	}
 
 	private static void loadFile(String filename, ArrayList<String> arrL)

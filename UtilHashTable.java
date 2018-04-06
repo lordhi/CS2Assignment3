@@ -9,6 +9,11 @@ public class UtilHashTable
 		ht = new HashMap<>((int) (n*4/3) + 10);
 	}
 
+	public void clear()
+	{
+		ht.clear();
+	}
+
 	public void add(String k, String v)
 	{
 		ht.put(Long.parseLong(k), v);

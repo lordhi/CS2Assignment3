@@ -21,6 +21,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.ImageIcon;
 
 import java.awt.Color;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -44,6 +45,7 @@ import java.io.BufferedReader;
 import java.util.Hashtable; //Need to use a dictionary for the testing pane, however unfortunately named
 
 import java.lang.Math;
+import java.lang.Runtime;
 
 public class Form
 	extends JFrame{
@@ -82,10 +84,14 @@ public class Form
 		ht = new HashTable(n);
 		instantiateDataLoadThread();
 
+		ImageIcon img = new ImageIcon("./data/coatOfArms.png");
+		this.setIconImage(img.getImage());
+
 		enterOrButton = new AbstractAction(){
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
+				long t1 = System.nanoTime();
 				String ID = txfEntry.getText();
 
 		                if (ID.length() == 13)
@@ -98,6 +104,8 @@ public class Form
 					txfEntry.setText("Enter ID number here.");
 				}
 				updateBorderColour(-1);
+				long t2 = System.nanoTime();
+				System.out.println("Search took " + (t2-t1) + " ns");
 			}
 		};
 
@@ -198,7 +206,7 @@ public class Form
 
 	private JPanel lastName()
 	{
-		Font vd = new Font("Verdana", 2, 40);
+		Font vd = new Font("Verdana", 2, 30);
 		JPanel pn = new JPanel(new GridLayout(2,2));
 
 		JLabel ID = new JLabel("ID:");
@@ -401,7 +409,10 @@ public class Form
 			long t1 = System.nanoTime();
 
 			ProgressMonitor pm = new ProgressMonitor(this, "Loading data file", null,0, 100);
-			BufferedReader br = new BufferedReader(new FileReader(new File("../data/IDList.csv")));
+			BufferedReader br = new BufferedReader(new FileReader(new File("./data/IDList.csv")));
+
+			n = Integer.parseInt(br.readLine());
+
 			pm.setProgress(0);
 			String s;
 			int i = 0, j=1;
@@ -410,12 +421,13 @@ public class Form
 			{
 				ht.add(s.substring(0,13), s.substring(14));
 
-				/*if (!s.substring(14).equals(ht.get(s.substring(0,13))))
+				if (!s.substring(14).equals(ht.get(s.substring(0,13))))
 				{
+					System.out.println("Yer fokin HashTable sux m8");
 					System.out.println(s.substring(0,13));
 					System.out.println(s.substring(14));
 					System.out.println(ht.get(s.substring(0,13)));
-				}*/
+				}
 				i++;
 				if (pm.isCanceled())
 					System.exit(0);
@@ -534,10 +546,10 @@ public class Form
 				}else{
 					long t1 = System.nanoTime();
 					
-					IterativeGenerator it = new IterativeGenerator(n, "../data/IDList.csv");
+					IterativeGenerator it = new IterativeGenerator(n, "./data/IDList.csv");
 					
 					ht.clear();
-					ProgressMonitor pm = new ProgressMonitor(mainPanel, "Loading data file", null, 0, 100);
+					ProgressMonitor pm = new ProgressMonitor(mainPanel, "Loading data", null, 0, 100);
 					
 					int i = 0, j = 1;
 					int p = (int) (n/100);

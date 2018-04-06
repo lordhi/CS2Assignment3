@@ -54,7 +54,8 @@ public class IterativeGenerator
 		
 		try
 		{
-			FileWriter fOut = new FileWriter(printFile);
+			BufferedWriter fOut = new BufferedWriter(new FileWriter(printFile));
+			fOut.write(n + "\r\n");
 			fOut.close();
 		}catch(Exception e){
 			System.err.println(e.getMessage());
@@ -78,9 +79,9 @@ public class IterativeGenerator
 		malFirstNames = new ArrayList<>();
 		surnames = new ArrayList<>();
 		
-		loadFile("../NameLists/femaleNames.csv", femFirstNames);
-		loadFile("../NameLists/maleNames.csv", malFirstNames);
-		loadFile("../NameLists/surnames.csv", surnames);
+		loadFile("./NameLists/femaleNames.csv", femFirstNames);
+		loadFile("./NameLists/maleNames.csv", malFirstNames);
+		loadFile("./NameLists/surnames.csv", surnames);
 		
 		currYear = Year.now().getValue() - 80;
 

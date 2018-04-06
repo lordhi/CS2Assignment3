@@ -1,18 +1,30 @@
-public class HashTable
+public class HashTableVariableSize
 {
 	protected int size;
+	protected int elements;
 
 	protected transient MyHash h;
 	protected transient int i;
 	protected transient int t;
 	protected transient Long tmp;
 
-	protected final long[] keys;
-	protected final String[] values;
+	protected long[] keys;
+	protected String[] values;
 
-	public HashTable(int n)
+	public HashTableVariableSize(int n)
 	{
 		size = (int)(n*2);
+		elements = 0;
+		h = new MyHash();
+
+		keys = new long[size];
+		values = new String[size];
+	}
+
+	public HashTableVariableSize()
+	{
+		size = 16;
+		elements = 0;
 		h = new MyHash();
 
 		keys = new long[size];
@@ -22,6 +34,10 @@ public class HashTable
 	public void add(String k, String v)
 	{
 		t = 1;
+		elements++;
+
+		if ((int) (elements*1.5) > size)
+			recreateHashTable(size*2);
 
 		do
 		{
@@ -64,5 +80,23 @@ public class HashTable
 				return keys[i] + "";
 		}
 		return null;
+	}
+
+	public void recreateHashTable(int n)
+	{
+		t=size;
+		size = n*2;
+
+		long[] oldKeys = keys;
+		String[] oldValues = values;
+
+		keys = new long[size];
+		values = new String[size];
+		for(int i=0; i<t; i++)
+		{
+			if (oldValues[i] != null) {
+				add(keys[i] + "", values[i]);
+			}
+		}
 	}
 }
