@@ -19,8 +19,8 @@ public class HashTable
 	public HashTable(int n)
 	{
 		size = (int)(n*2);
-
 		h = new MyHash();
+
 		keys = new long[size];
 		values = new String[size];
 	}
@@ -37,6 +37,15 @@ public class HashTable
 
 		keys[i] = Long.parseLong(k);
 		values[i] = v;
+	}
+
+	public void clear()
+	{
+		for(int j=0; j<size; j++)
+		{
+			keys[j] = 0;
+			values[j] = null;
+		}
 	}
 
 	public String get(String k)

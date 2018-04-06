@@ -48,15 +48,16 @@ import java.lang.Math;
 public class Form
 	extends JFrame{
 
+	private JOptionPane pane;
 	private JPanel mainPanel, dataEntry, oldNames;
 	private JLabel lblname1, lblname2, lblname3, lblname4, lblname5, lblname6, lblid1, lblid2, lblid3, lblid4, lblid5, lblid6, lblstuff;
 	private JTextField txfEntry;
 	private JButton btnCheckID;
-	private AbstractAction enterOrButton, pasteAction, reload, generateData;
+	private AbstractAction enterOrButton, pasteAction, reload, generateData, close;
 
 	private JMenuBar menuBar;
 	private JMenu menuFile, menuTest;
-	private JMenuItem menuItem, generateNewData;
+	private JMenuItem reloadData, closeApp, generateNewData;
 
 	private SwingWorker loadTable, makeData;
 
@@ -78,6 +79,7 @@ public class Form
 
 	public Form()
 	{
+		ht = new HashTable(n);
 		instantiateDataLoadThread();
 
 		enterOrButton = new AbstractAction(){
@@ -90,7 +92,7 @@ public class Form
         	        	{
 					String name = ht.get(ID);
 					if (name != null)
-                	        		addNewID(ID + "  ", name);
+                	    addNewID(ID + "  ", name);
 					else
 						addNewID(ID + " ");
 					txfEntry.setText("Enter ID number here.");
@@ -144,6 +146,15 @@ public class Form
 				}catch(Exception ex){
 					System.err.println(ex.getMessage());
 				}
+			}
+		};
+
+		close = new AbstractAction()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				System.exit(0);
 			}
 		};
 
@@ -285,12 +296,16 @@ public class Form
 		menuTest = new JMenu("Test");
 		menuTest.setFont(mF);
 
-		JMenuItem reloadData = new JMenuItem("Reload the data file");
+		reloadData = new JMenuItem("Reload the data file");
 		reloadData.setFont(iF);
 		reloadData.addActionListener(reload);
+		closeApp = new JMenuItem("Close");
+		closeApp.setFont(iF);
+		closeApp.addActionListener(close);
 		menuFile.add(reloadData);
+		menuFile.add(closeApp);
 		
-		JMenuItem generateNewData = new JMenuItem("Generate new data");
+		generateNewData = new JMenuItem("Generate new data");
 		generateNewData.setFont(iF);
 		generateNewData.addActionListener(generateData);
 		menuTest.add(generateNewData);
@@ -383,6 +398,8 @@ public class Form
 	{
 		try
 		{
+			long t1 = System.nanoTime();
+
 			ProgressMonitor pm = new ProgressMonitor(this, "Loading data file", null,0, 100);
 			BufferedReader br = new BufferedReader(new FileReader(new File("../data/IDList.csv")));
 			pm.setProgress(0);
@@ -393,10 +410,12 @@ public class Form
 			{
 				ht.add(s.substring(0,13), s.substring(14));
 
-				if (!s.substring(14).equals(ht.get(s.substring(0,13))))
+				/*if (!s.substring(14).equals(ht.get(s.substring(0,13))))
 				{
+					System.out.println(s.substring(0,13));
+					System.out.println(s.substring(14));
 					System.out.println(ht.get(s.substring(0,13)));
-				}
+				}*/
 				i++;
 				if (pm.isCanceled())
 					System.exit(0);
@@ -410,6 +429,8 @@ public class Form
 			}
 			pm.close();
 			br.close();
+
+			System.out.println("Hashtable created from file in " + (System.nanoTime()-t1)/1000000 + " ms");
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 			System.exit(0);
@@ -427,9 +448,7 @@ public class Form
 			public HashTable doInBackground()
 			{
 				System.out.println("Loading");
-				ht = null;
-
-				ht = new HashTable(n);
+				ht.clear();
 				loadIDs(ht);
 				System.out.println("Loaded");
 				return ht;
@@ -456,17 +475,17 @@ public class Form
 		if (makeData != null)
 			makeData.cancel(true);
 
-		makeData = new SwingWorker<HashTable, Void>()
+		makeData = new SwingWorker<HashTable, Integer>()
 		{
 			@Override
 			public HashTable doInBackground()
 			{
-				JOptionPane pane = new JOptionPane();
+				pane = new JOptionPane();
 				Object obj[] = new Object[3];
 				JSlider slide = new JSlider(100,700);
 
 				// Note: This is a Hashtable not a HashTable. A dictionary was needed to set the labels on the JSlider, however dictionaries have been deprecated. This was the only one I could find.
-				Hashtable<Integer, JLabel> labeldic = new Hashtable();
+				Hashtable<Integer, JLabel> labeldic = new Hashtable<>();
 				labeldic.put(100, new JLabel("30"));
 				labeldic.put(200, new JLabel("300"));
 				labeldic.put(300, new JLabel("3 000"));
@@ -487,10 +506,9 @@ public class Form
 						public void stateChanged(ChangeEvent changeEvent)
 						{
 							JSlider theSlider = (JSlider) changeEvent.getSource();
+							int tmp = (int) (3*Math.pow(10, theSlider.getValue()/100.0));						
 							if (!theSlider.getValueIsAdjusting())
-								pane.setMessage(obj);
-							int tmp = (int) (3*Math.pow(10, theSlider.getValue()/100.0));
-							pane.setInputValue(tmp);
+								pane.setInputValue(tmp);	
 							lbl.setText("Current Value: " + tmp);
 						}
 					});
@@ -501,7 +519,7 @@ public class Form
 				pane.setMessageType(JOptionPane.QUESTION_MESSAGE);
 				pane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
 
-				JDialog dialog = pane.createDialog(mainPanel, "Select number.");
+				JDialog dialog = pane.createDialog(mainPanel, "Selection Pane");
 				dialog.setPreferredSize(new Dimension(600, 200));
 				dialog.pack();
 				dialog.setVisible(true);
@@ -514,23 +532,35 @@ public class Form
 					GenerateNames.getEntries(n);
 					instantiateDataLoadThread();
 				}else{
+					long t1 = System.nanoTime();
+					
 					IterativeGenerator it = new IterativeGenerator(n, "../data/IDList.csv");
-					ht = null;
 					
-					ProgressMonitor pm = new ProgressMonitor(mainPanel, "Loading data file", null, 0, n);
+					ht.clear();
+					ProgressMonitor pm = new ProgressMonitor(mainPanel, "Loading data file", null, 0, 100);
+					
+					int i = 0, j = 1;
+					int p = (int) (n/100);
+					String s[];
 
-					int i = 0;
-					
 					while(it.hasNext())
-					{
-						String s[] = it.next();
+					{		
+						s = it.next();
 						ht.add(s[0], s[1]);
-						pm.setProgress(i);
 						i++;
+
 						if(pm.isCanceled())
 							System.exit(0);
+						if (i == p)
+						{
+							pm.setProgress(j);
+							System.out.println(j + "%");
+							i=0;
+							j++;
+						}
 					}
 					pm.close();
+					System.out.println("Hashtable made from generated data(printed to file) in " + (System.nanoTime()-t1)/1000000 + " ms");
 				}
 
 
