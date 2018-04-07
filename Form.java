@@ -38,6 +38,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Dimension;
 
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -61,7 +63,7 @@ public class Form
 	private JMenu menuFile, menuTest;
 	private JMenuItem reloadData, closeApp, generateNewData;
 
-	private SwingWorker loadTable, makeData;
+	private SwingWorker loadTable, makeData, saveTime;
 
 	private HashTable ht;
 
@@ -105,7 +107,7 @@ public class Form
 				}
 				updateBorderColour(-1);
 				long t2 = System.nanoTime();
-				System.out.println("Search took " + (t2-t1) + " ns");
+				saveSearchTime(t2-t1);
 			}
 		};
 
@@ -581,5 +583,43 @@ public class Form
 		};
 
 		makeData.execute();
+	}
+
+	private void saveSearchTime(long t)
+	{
+		if (saveTime != null)
+			saveTime.cancel(true);
+		else
+		{
+			try
+			{
+				BufferedWriter wr = new BufferedWriter(new FileWriter("Report/Data/SearchTimes.csv"));
+				wr.close();
+			}catch(Exception e)
+			{
+				System.err.println(e.getMessage());
+				System.exit(0);
+			}
+		}
+
+		saveTime = new SwingWorker<String, Integer>()
+		{
+			@Override
+			public String doInBackground()
+			{
+				try
+				{
+					BufferedWriter wr = new BufferedWriter(new FileWriter("Report/Data/SearchTimes.csv", true));
+					wr.write(System.currentTimeMillis() + ", " + t + "\r\n");
+					wr.close();
+				}catch(Exception e){
+					System.err.println(e.getMessage());
+					System.exit(0);
+				}
+				return null;
+			}
+		};
+
+		saveTime.execute();
 	}
 }
