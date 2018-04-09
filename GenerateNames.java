@@ -144,30 +144,16 @@ public class GenerateNames
 		malFirstNames = new ArrayList<>();
 		surnames = new ArrayList<>();
 
-		loadFile("./NameLists/femaleNames.csv", femFirstNames);
-		loadFile("./NameLists/maleNames.csv", malFirstNames);
-		loadFile("./NameLists/surnames.csv", surnames);
-	}
-
-	private static void loadFile(String filename, ArrayList<String> arrL)
-	{
-		try
-		{
-			BufferedReader in = new BufferedReader(new FileReader(new File(filename)));
-			String inp;
-			while((inp = in.readLine()) != null)
-				arrL.add(inp);
-		}catch(Exception e){
-			System.err.println("Exception encountered: " + e.getMessage());
-			System.exit(1);
-		}
+		NameGenerationLibrary.loadFile("./NameLists/femaleNames.csv", femFirstNames);
+		NameGenerationLibrary.loadFile("./NameLists/maleNames.csv", malFirstNames);
+		NameGenerationLibrary.loadFile("./NameLists/surnames.csv", surnames);
 	}
 
 	private static String generateID(Random ran, int minYear, int maxYear, boolean isFemale)
 	{
 		int year = minYear + ran.nextInt(maxYear);
 		int month = 1 + ran.nextInt(12);
-		int day = 1 + ran.nextInt(maxDaysInMonth(month, year));
+		int day = 1 + ran.nextInt(NameGenerationLibrary.daysInMonth(month, year));
 
 		int[] ID = new int[13];
 
@@ -205,22 +191,12 @@ public class GenerateNames
 			ID[11] = ran.nextInt(7);
 
 		//The last digit is a checksum, using the Luhn Algorithm
-		ID[12] = luhn(ID);
+		ID[12] = NameGenerationLibrary.luhn(ID);
 
 		String sID = "";
 		for (int i=0; i < 13; i++)
 			sID += ID[i];
 		return sID;
-	}
-
-	private static int luhn(int[] num)
-	{
-		int length = num.length - 1; //Keeps track of the length of the array, excluding the checksum
-		int checkSum = 0;
-		for (int i=0; i<length; i++)
-			checkSum += num[i];
-		checkSum *= 9;
-		return checkSum%10;
 	}
 
 	private static int genderDigit(Random ran, boolean isFemale)
@@ -235,28 +211,6 @@ public class GenerateNames
 		else if (ran.nextInt(10) > 5)
 			return tmp + 3;
 		else return tmp + 4;
-	}
-
-	private static int maxDaysInMonth(int month, int year)
-	{
-		if (month==1 || month==3 || month==5 || month==7 || month==8 || month==10 || month==12)
-		{
-			return 31;
-		}else if (month==2){
-			if (isLeapYear(year))
-			{
-				return 29;
-			}else{
-				return 28;
-			}
-		}else{
-			return 30;
-		}
-	}
-
-	private static boolean isLeapYear(int year)
-	{
-		return (((year%4) == 0) && ((year%100) != 0) || ((year%400) ==0));
 	}
 
 	private static void checkArgs(String[] args)
