@@ -67,8 +67,6 @@ public class Form
 
 	private HashTable ht;
 
-	private int n = 30000000;
-
 	public static void main(String[] args)
 	{
 		SwingUtilities.invokeLater(new Runnable()
@@ -83,7 +81,6 @@ public class Form
 
 	public Form()
 	{
-		ht = new HashTable(n);
 		instantiateDataLoadThread();
 
 		ImageIcon img = new ImageIcon("./data/coatOfArms.png");
@@ -107,7 +104,7 @@ public class Form
 				}
 				updateBorderColour(-1);
 				long t2 = System.nanoTime();
-				saveSearchTime(t2-t1);
+				//saveSearchTime(t2-t1);
 			}
 		};
 
@@ -404,7 +401,7 @@ public class Form
 		txfEntry.setBorder(border);
 	}
 
-	private void loadIDs(HashTable table)
+	/*private void loadIDs(HashTable table)
 	{
 		try
 		{
@@ -449,7 +446,7 @@ public class Form
 			System.err.println(e.getMessage());
 			System.exit(0);
 		}
-	}
+	}*/
 
 	private void instantiateDataLoadThread()
 	{
@@ -462,8 +459,7 @@ public class Form
 			public HashTable doInBackground()
 			{
 				System.out.println("Loading");
-				ht.clear();
-				loadIDs(ht);
+				HashTableLoader.loadIDs(ht, mainPanel);
 				System.out.println("Loaded");
 				return ht;
 			}
@@ -538,7 +534,7 @@ public class Form
 				dialog.pack();
 				dialog.setVisible(true);
 				
-				n = (int) pane.getInputValue();
+				int n = (int) pane.getInputValue();
 				System.out.println(n);
 
 				if (n <= 1000000)
