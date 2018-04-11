@@ -7,7 +7,7 @@ public class TextUI
 	public static void main(String[] args)
 	{
 		System.out.print("\033[H\033[2J");  //Clears the screen
-    	System.out.flush();
+		System.out.flush();
 
 		ht = HashTableLoader.loadIDs();
 		for(String arg : args)

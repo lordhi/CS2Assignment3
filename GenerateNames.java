@@ -103,21 +103,24 @@ public class GenerateNames
 		int year = Year.now().getValue();
 
 		HashMap<Long, String> entries = new HashMap<Long, String>();
+
 		for (int i=0; i < n; i++)
 		{
 			boolean clash;
 			do{
 				clash = false;
 				String s = generateEntry(ran, year-maxAge, year-minAge);
-				if(!entries.containsKey(s.substring(0,13).hashCode()))
+				if(!entries.containsKey(Long.parseLong(s.substring(0,13))))
+				{
 					entries.put(Long.parseLong(s.substring(0,13)), s);
+				}
 				else
 					clash = true;
 			}while(clash);
 		}
 
-		String arr[] = new String[n];
 		Object tmp[] = entries.values().toArray();
+		String arr[] = new String[n];
 
 		for (int i=0; i<n; i++)
 			arr[i] = (String)(tmp[i]);
@@ -151,7 +154,7 @@ public class GenerateNames
 
 	private static String generateID(Random ran, int minYear, int maxYear, boolean isFemale)
 	{
-		int year = minYear + ran.nextInt(maxYear);
+		int year = minYear==maxYear ? minYear : ran.nextInt(maxYear-minYear);
 		int month = 1 + ran.nextInt(12);
 		int day = 1 + ran.nextInt(NameGenerationLibrary.daysInMonth(month, year));
 

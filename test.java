@@ -24,18 +24,16 @@ public class test
 		//hashTable1FromFileTest();
 		//hashTableSerialisedOutTest();
 		//hashTableSerialisedInTest();
-		testAllItems();
-		reduceDataToOneFile();
+		testAllItems(50000);
+		reduceDataToOneFile(50000);
 	}
 
-	public static void reduceDataToOneFile()
+	public static void reduceDataToOneFile(int n)
 	{
-		n = 30000000;
-
-		Thread thread1 = new Thread(new FileReduction(n, 0, 2500, "./Report/Data/All/", "./Report/Data/All/Partial/1.csv"), "Thread1");
-		Thread thread2 = new Thread(new FileReduction(n, 2500, 5000, "./Report/Data/All/", "./Report/Data/All/Partial/2.csv"), "Thread2");
-		Thread thread3 = new Thread(new FileReduction(n, 5000, 7500, "./Report/Data/All/", "./Report/Data/All/Partial/3.csv"), "Thread3");
-		Thread thread4 = new Thread(new FileReduction(n, 7500, 10000, "./Report/Data/All/", "./Report/Data/All/Partial/4.csv"), "Thread4");
+		Thread thread1 = new Thread(new FileReduction(n, 0, 2500, "./Report/Data/TensThousands/All/", "./Report/Data/TensThousands/All/Partial/1.csv"), "Thread1");
+		Thread thread2 = new Thread(new FileReduction(n, 2500, 5000, "./Report/Data/TensThousands/All/", "./Report/Data/TensThousands/All/Partial/2.csv"), "Thread2");
+		Thread thread3 = new Thread(new FileReduction(n, 5000, 7500, "./Report/Data/TensThousands/All/", "./Report/Data/TensThousands/All/Partial/3.csv"), "Thread3");
+		Thread thread4 = new Thread(new FileReduction(n, 7500, 10000, "./Report/Data/TensThousands/All/", "./Report/Data/TensThousands/All/Partial/4.csv"), "Thread4");
 
 		thread1.start();
 		thread2.start();
@@ -52,13 +50,12 @@ public class test
 			}
 		}
 
-		Thread thread = new Thread(new FileReduction(n, 1, 5, "./Report/Data/All/Partial/", "./Report/Data/All.csv"), "Thread1");
+		Thread thread = new Thread(new FileReduction(n, 1, 5, "./Report/Data/TensThousands/All/Partial/", "./Report/Data/TensThousands/All.csv"), "Thread1");
 		thread.start();
 	}
 
-	public static void testAllItems()
+	public static void testAllItems(int n)
 	{
-		n = 30000000;
 		HashTable ht = new HashTable(n);
 		String arr[] = new String[n];
 
@@ -89,10 +86,10 @@ public class test
             System.exit(0);
         }
 
-        Thread thread1 = new Thread(new TestSearches(0,2500, arr, ht), "Thread1");
-        Thread thread2 = new Thread(new TestSearches(2500,5000, arr, ht), "Thread1");
-        Thread thread3 = new Thread(new TestSearches(5000,7500, arr, ht), "Thread1");
-        Thread thread4 = new Thread(new TestSearches(7500,10000, arr, ht), "Thread1");
+        Thread thread1 = new Thread(new TestSearches(n, 0,2500, arr, ht), "Thread1");
+        Thread thread2 = new Thread(new TestSearches(n, 2500,5000, arr, ht), "Thread1");
+        Thread thread3 = new Thread(new TestSearches(n, 5000,7500, arr, ht), "Thread1");
+        Thread thread4 = new Thread(new TestSearches(n, 7500,10000, arr, ht), "Thread1");
 
         thread1.start();
         thread2.start();

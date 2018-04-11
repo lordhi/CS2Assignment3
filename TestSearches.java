@@ -12,9 +12,11 @@ public class TestSearches
 	String[] arr;
 	int min;
 	int max;
+        int n;
 
-	public TestSearches(int min, int max, String[] arr, HashTable ht)
+	public TestSearches(int n, int min, int max, String[] arr, HashTable ht)
 	{
+                this.n = n;
 		this.min = min;
 		this.max = max;
 		this.arr = arr;
@@ -24,14 +26,13 @@ public class TestSearches
 	public void run()
 	{
 		for(int i=min; i<max; i++)
-			testAndWrite(i, arr, ht);
+		      testAndWrite(i, arr, ht);
+
 	}
 
 
-	public static void testAndWrite(int f, String[] arr, HashTable ht)
+	public void testAndWrite(int f, String[] arr, HashTable ht)
 	{
-                int n =30000000;
-
                 long times[] = new long[n];
                 long t1, t2;
 
@@ -58,7 +59,7 @@ public class TestSearches
 
                 try
                 {
-                	BufferedWriter wr = new BufferedWriter(new FileWriter("./Report/Data/All/" + f + ".csv"));
+                	BufferedWriter wr = new BufferedWriter(new FileWriter("./Report/Data/TensThousands/All/" + f + ".csv"));
                 	for(long l : times)
                 	{
                 		wr.write(l + "\r\n");

@@ -412,7 +412,7 @@ public class Form
 			public HashTable doInBackground()
 			{
 				System.out.println("Loading");
-				ht = HashTableLoader.loadIDs(ht, mainPanel);
+				ht = HashTableLoader.loadIDs(ht, mainPanel, 30000000);
 				System.out.println("Loaded");
 				return ht;
 			}

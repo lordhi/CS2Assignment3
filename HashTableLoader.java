@@ -8,12 +8,12 @@ import java.awt.Component;
 
 public class HashTableLoader
 {	
-	public static HashTable loadIDs(HashTable ht, Component th)
+	public static HashTable loadIDs(HashTable ht, Component th, int size)
 	{
 		try
 		{
 			if (ht == null)
-				ht = new HashTable(30000000);
+				ht = new HashTable(size);
 			else
 				ht.clear();
 
@@ -34,17 +34,13 @@ public class HashTableLoader
 			{
 				ht.add(s.substring(0,13), s.substring(14));
 
-				if (!s.substring(14).equals(ht.get(s.substring(0,13))))
-				{
-					System.out.println(s.substring(0,13));
-					System.out.println(s.substring(14));
-					System.out.println(ht.get(s.substring(0,13)));
-				}
 				i++;
 				if (pm.isCanceled())
 					System.exit(0);
 				if (i==p)
 				{
+					System.out.print(String.format("\033[%dA",1)); // Move up
+					System.out.print("\033[2K"); // Erase line content();
 					System.out.println(j + "%");
 					pm.setProgress(j);
 					i=0;
@@ -83,12 +79,6 @@ public class HashTableLoader
 			{
 				ht.add(s.substring(0,13), s.substring(14));
 
-				if (!s.substring(14).equals(ht.get(s.substring(0,13))))
-				{
-					System.out.println(s.substring(0,13));
-					System.out.println(s.substring(14));
-					System.out.println(ht.get(s.substring(0,13)));
-				}
 				i++;
 
 				if (i==p)
