@@ -8,7 +8,7 @@ import java.awt.Component;
 
 public class HashTableLoader
 {	
-	public static void loadIDs(HashTable ht, Component th)
+	public static HashTable loadIDs(HashTable ht, Component th)
 	{
 		try
 		{
@@ -56,10 +56,12 @@ public class HashTableLoader
 			br.close();
 
 			System.out.println("Hashtable created from file in " + (System.nanoTime()-t1)/1000000 + " ms");
+			return ht;
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 			System.exit(0);
 		}
+		return null;
 	}
 
 	public static HashTable loadIDs()

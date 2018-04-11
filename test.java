@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+import java.lang.Thread;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.esotericsoftware.kryo.io.UnsafeInput;
@@ -22,6 +24,90 @@ public class test
 		//hashTable1FromFileTest();
 		//hashTableSerialisedOutTest();
 		//hashTableSerialisedInTest();
+		testAllItems();
+		reduceDataToOneFile();
+	}
+
+	public static void reduceDataToOneFile()
+	{
+		n = 30000000;
+
+		Thread thread1 = new Thread(new FileReduction(n, 0, 2500, "./Report/Data/All/", "./Report/Data/All/Partial/1.csv"), "Thread1");
+		Thread thread2 = new Thread(new FileReduction(n, 2500, 5000, "./Report/Data/All/", "./Report/Data/All/Partial/2.csv"), "Thread2");
+		Thread thread3 = new Thread(new FileReduction(n, 5000, 7500, "./Report/Data/All/", "./Report/Data/All/Partial/3.csv"), "Thread3");
+		Thread thread4 = new Thread(new FileReduction(n, 7500, 10000, "./Report/Data/All/", "./Report/Data/All/Partial/4.csv"), "Thread4");
+
+		thread1.start();
+		thread2.start();
+		thread3.start();
+		thread4.start();
+
+		while(thread1.isAlive() || thread2.isAlive() || thread3.isAlive() || thread4.isAlive())
+		{
+			try
+			{
+				Thread.sleep(10000);
+			}catch(Exception e){
+				System.err.println("Sleep interuppted!");
+			}
+		}
+
+		Thread thread = new Thread(new FileReduction(n, 1, 5, "./Report/Data/All/Partial/", "./Report/Data/All.csv"), "Thread1");
+		thread.start();
+	}
+
+	public static void testAllItems()
+	{
+		n = 30000000;
+		HashTable ht = new HashTable(n);
+		String arr[] = new String[n];
+
+		try
+		{
+			BufferedReader br = new BufferedReader(new FileReader(new File("./data/IDList.csv")));
+            String s, k;
+            int i = 0, j=1, p = (int)(n/100);
+            br.readLine();
+            while((s=br.readLine()) != null)
+            {
+            	k = s.substring(0,13);
+                ht.add(k, s.substring(14));
+                arr[i] = k;
+                i++;
+                if(i%p == 0)
+                {
+                	System.out.print("\033[H\033[2J");  //Clears the screen
+    				System.out.flush();
+                    System.out.println(j);
+                    j++;
+                }
+            }
+            br.close();
+        }catch(Exception e){
+            System.err.println("Error during reading of data");
+            System.err.println(e.getMessage());
+            System.exit(0);
+        }
+
+        Thread thread1 = new Thread(new TestSearches(0,2500, arr, ht), "Thread1");
+        Thread thread2 = new Thread(new TestSearches(2500,5000, arr, ht), "Thread1");
+        Thread thread3 = new Thread(new TestSearches(5000,7500, arr, ht), "Thread1");
+        Thread thread4 = new Thread(new TestSearches(7500,10000, arr, ht), "Thread1");
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+
+        while(thread1.isAlive() || thread2.isAlive() || thread3.isAlive() || thread4.isAlive())
+		{
+			try
+			{
+				Thread.sleep(10000);
+			}catch(Exception e){
+				System.err.println("Sleep interuppted!");
+			}
+		}
 	}
 
 	public static void hashTableSerialisedInTest()

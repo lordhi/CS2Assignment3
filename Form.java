@@ -401,53 +401,6 @@ public class Form
 		txfEntry.setBorder(border);
 	}
 
-	/*private void loadIDs(HashTable table)
-	{
-		try
-		{
-			long t1 = System.nanoTime();
-
-			ProgressMonitor pm = new ProgressMonitor(this, "Loading data file", null,0, 100);
-			BufferedReader br = new BufferedReader(new FileReader(new File("./data/IDList.csv")));
-
-			n = Integer.parseInt(br.readLine());
-
-			pm.setProgress(0);
-			String s;
-			int i = 0, j=1;
-			int p = (int)(n/100) + 1;
-			while ((s=br.readLine()) != null)
-			{
-				ht.add(s.substring(0,13), s.substring(14));
-
-				if (!s.substring(14).equals(ht.get(s.substring(0,13))))
-				{
-					System.out.println("Yer fokin HashTable sux m8");
-					System.out.println(s.substring(0,13));
-					System.out.println(s.substring(14));
-					System.out.println(ht.get(s.substring(0,13)));
-				}
-				i++;
-				if (pm.isCanceled())
-					System.exit(0);
-				if (i==p)
-				{
-					System.out.println(j + "%");
-					pm.setProgress(j);
-					i=0;
-					j++;
-				}
-			}
-			pm.close();
-			br.close();
-
-			System.out.println("Hashtable created from file in " + (System.nanoTime()-t1)/1000000 + " ms");
-		}catch(Exception e){
-			System.err.println(e.getMessage());
-			System.exit(0);
-		}
-	}*/
-
 	private void instantiateDataLoadThread()
 	{
 		if(loadTable != null)
@@ -459,7 +412,7 @@ public class Form
 			public HashTable doInBackground()
 			{
 				System.out.println("Loading");
-				HashTableLoader.loadIDs(ht, mainPanel);
+				ht = HashTableLoader.loadIDs(ht, mainPanel);
 				System.out.println("Loaded");
 				return ht;
 			}
@@ -545,10 +498,11 @@ public class Form
 					long t1 = System.nanoTime();
 					
 					IterativeGenerator it = new IterativeGenerator(n, "./data/IDList.csv");
-					
+
 					ht.clear();
+
 					ProgressMonitor pm = new ProgressMonitor(mainPanel, "Loading data", null, 0, 100);
-					
+
 					int i = 0, j = 1;
 					int p = (int) (n/100);
 					String s[];
